@@ -1,0 +1,365 @@
+<!--
+	创建对象：
+		工厂模式
+		构造函数模式
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+<body>
+<script>
+//__proto__
+//1.所有构造器/函数的__proto__都指向Function.prototype，它是一个空函数（Empty function）
+//2.所有对象的__proto__都指向其构造器的prototype
+
+	//*********工厂模式********
+
+	// 不能判定对象类型 造出来的都是object
+	//对象类型包括：内置对象类型，普通对象类型，自定义对象类型
+	function create(name,age,job){
+		var o =new Object();
+		o.name = name;
+		o.age = age;
+		o.job = job;
+		return o;
+	}
+	var a = create("zky",24,"FE");
+	var b = create("qxq",22,"UI");
+	console.log(a,b);
+	console.log(b instanceof Object);
+
+	//*******构造函数模式**********
+
+
+	//可以创建特定类型的对象
+	//构造函数以一个大写字母开头
+	//构造函数胜过工厂模式因为它的实例就可以标志为一种特定的类型，而不是object
+	function Person(name,age,job){
+		console.log(this,arguments);
+		this.name = name;   //作为构造函数调用this，这个this指代该实例对象
+		this.age = age;
+		this.job = job;
+		this.sayName = function(){
+			console.log(this);
+		};
+		//等价于
+//		this.sayName = new Function (console.log(this.name))
+	}
+	var p1 = new Person("zky",24,"FE"); //必须用new操作符  //!!!! 任何函数 只要通过new操作符来调用，那它就可以作为构造函数
+	var p2 = new Person("qxq",22,"UI");
+//	var p3 =  Person("tr",20,"AI");   //普通调用 ，this为window sayName为全局函数
+	console.log(11,Person);
+	console.log(p1,p2);
+	p2.sayName();
+	console.log(p1 instanceof Object); //true
+	console.log(p1 instanceof Person); //true
+	//构造函数的问题：每个方法都要在每个实例上重新创建一遍，会导致不同的作用域链和标识符解析
+	//如果把方法提到外面去，每个实例都引用它，就一样了，然而有很多方法的话就会定义很多的全局函数，不好，没有封装性可言
+	console.log(p1.sayName===p2.sayName); //false
+	console.log(p1.age===p2.age); //false
+
+	//*******原型模式*******
+	//每一个函数都有一个prototype属性，指向它的原型对象 都有一个__proto__ 都指向Function.prototype，它是一个空函数
+	console.log(Person.prototype);
+	function Func(){
+
+	}
+	console.log(Func.prototype);
+	Func.prototype.name = "zky";
+	Func.prototype.age = 24;
+	Func.prototype.job = "FE";
+	Func.prototype.sayName = function(){
+		console.log(this.name);
+	};
+	var f1 = new Func();
+	console.log(f1);
+	console.log(f1.__proto__);
+//	f1.name = "tr";
+	console.log(f1.name);
+	var f2 = new Func();
+	console.log(f1.sayName === f2.sayName); //true
+	f2.sayName= function(){
+		console.log(this.name);
+	};
+	console.log(f1.sayName === f2.sayName); //false
+	console.log(f1,f2);
+
+	//*** 1.理解原型对象
+
+	// 创建一个函数，就会为函数创建一个prototype属性，他是个指针，指向这个函数的原型对象。
+	// 原型对象含有一个constructor（构造函数）属性，指向prototype属性所在的那个函数（即“创建的那个函数”）。
+	console.log(Func);
+	console.log(Func.prototype);//自定义的构造函数的原型对象
+	console.log(Func.prototype.constructor);
+	console.log(f1.constructor);
+	console.log(Func === Func.prototype.constructor); //true
+	//创建自定义的构造函数，其原型对象只有默认的constructor属性，其他方法属性都从Object继承过来
+	//调用构造函数创建实例（f1）后，f1有个内部属性：[[Prototype]],指向构造函数的原型对象,在浏览器中用__proto__访问。
+	//!!!这个连接存在与实例（f1）与原型对象之间，而不是f1与构造函数之间。
+	//用isPrototypeOf来判定实例对象和原型对象是否有关系
+	console.log(Func.prototype.isPrototypeOf(f1)); //true
+	console.log(Func.prototype.isPrototypeOf(f2));  //true
+	console.log(Object.prototype.isPrototypeOf(f2));  //true
+	console.log(Func.prototype.isPrototypeOf(p1));  //false
+	//返回实例[[Prototype]]的值,即构造函数的原型对象
+	console.log(Object.getPrototypeOf(f1));
+	console.log(Object.getPrototypeOf(f1) === Func.prototype); //true
+	//多个对象实例共享原型属性方法的原理：先搜索实例本身，没有就搜索他的原型对象。
+	console.log(f1.name);   //zky
+	f1.name = "lr";
+	console.log(f1.name);  //lr
+	f1.name = null;
+	console.log(f1.name);   //null
+	delete  f1.name;  //只有删除才会重新读取原型中的值
+	console.log(f1.name);  //zky
+	//检测一个属性是否在实例还是原型  实例返回true
+	console.log(f1.hasOwnProperty("name")); //false
+	f1.name = null;
+	console.log(f1.hasOwnProperty("name")); //false
+	console.log(Object.getOwnPropertyDescriptor(f1,"name"));
+	console.log(Object.getOwnPropertyDescriptor(f1.__proto__,"name"));
+
+	//*** 2.原型与 in 操作符
+	function Book(){
+
+	}
+	Book.prototype.name = "zky";
+	Book.prototype.age = 24;
+	Book.prototype.job = "FE";
+	Book.prototype.sayName = function(){
+		console.log(this.name);
+	};
+	var b1 = new Book();
+	var b2 = new Book();
+	console.log(Book.prototype);
+	console.log(b1.hasOwnProperty("name"));  //false  在原型 返回false
+	console.log("name" in b1);   //true    无论在哪 有这属性就返回true
+	b1.name = "zzz";
+	console.log(b1.hasOwnProperty("name"));  //true  在实例 返回true
+	console.log("name" in b1);   //true    无论在哪 有这属性就返回true
+	//！！！判定一个属性在原型还是在实例
+	function a(obj,name){
+		return (name in obj) && !obj.hasOwnProperty(name);
+	}
+	//for-in循环中，返回所有能通过对象访问，可枚举的属性。包括实例和原型。   被打上了值为 false 的[[Enumerable]]标记就不能枚举了，很多内部属性都被打上了。
+	for (var x in b1){
+		console.log(x);   // name age job sayName
+	}
+	//返回所有通过对象访问，可枚举的只是实例的属性：
+	console.log(Object.keys(b2));  // []
+	b1.age = 22;
+	console.log(Object.keys(b1));  // ["name", "age"]
+	console.log(Object.keys(Book.prototype));  //["name", "age", "job", "sayName"]
+	console.log(Object.keys(b1.__proto__));  //["name", "age", "job", "sayName"]
+	//返回所有通过对象访问，所有实例属性：
+	console.log(Object.getOwnPropertyNames(b2));  // []
+	console.log(Object.getOwnPropertyNames(b1));  // ["name", "age"]
+	console.log(Object.getOwnPropertyNames(Book.prototype));  // ["constructor", "name", "age", "job", "sayName"]
+
+	//*** 3.更简单的原型语法
+
+	//对象字面量重写原型对象
+	function Color(){
+
+	}
+	var C1 = new Color();
+	Color.prototype = {
+		constructor:Color,      //用来强行还原，不过这样就让他可枚举了 ，[[Enumerable]]特性被设置为 true。 用Object.defineProperty()设回来。
+		name :"zky",
+		age : 24,
+		job : "FE",
+		sayName : function(){
+			console.log(this.name);
+		}
+	};
+	var C2 = new Color();
+	console.log(Color.prototype);
+	//上面重写了prototype对象,就没了constructor属性  其他都一样
+	console.log(C1 instanceof Object);  //true
+	console.log(C1 instanceof Color);   //true
+	console.log(Color.prototype.constructor === Color); //false
+	console.log(C1.__proto__); //undefined
+	console.log(C2.__proto__); //有
+	console.info(Object.prototype.toString.apply(C1)); //[object Object]
+	console.info(Object.prototype.toString.apply(C2)); //[object Object]
+
+	//****** 4.原型的动态性
+
+	//对原型对象所做的任何修改都能够立即从实例上反映过来。
+	function Arr(){
+
+	}
+	var a1 = new Arr();
+//	Arr.prototype.say = function(){
+//		console.log(this);
+//	};
+	Arr.prototype = {
+		constructor:Arr,
+		say : function(){
+			console.log(this);
+		}
+	};
+	var a2 = new Arr();
+	//a1 先实例化 链接的那个原型被重写 所有不是后来的这个
+	console.log(a1.say);  //undefined
+	//a2 后实例化 重新连接后的
+	console.log(a2.say);	//function(){...}
+
+	//******* 5.原生对象的原型
+
+	//原生的引用类型（Object,Array,String等）也是原型模式创建的
+	console.log(Array.prototype); //里面有所有的方法
+	var str="hello!";
+	String.prototype.aa = function(text){
+		console.log(text,123);
+	};
+//	String.prototype = {
+//		aa:function(text){
+//			console.log(text,123);
+//		}
+//	};
+	console.log(str);
+	str.aa(str);
+	//!!不推荐在产品化的程序中修改原生对象的原型，容易冲突
+
+	//******* 6.原型对象的问题
+
+	//由共享引起的引用类型的问题
+	function Kic(){
+
+	}
+	Kic.prototype = {
+		constructor:Kic,
+		name:"zky",
+		age:24,
+		job:["FE","SEO"],
+		sayName:function(){
+			alert(this.name);
+		}
+	};
+	var k1 = new Kic();
+	var k2 = new Kic();
+	k1.job.push("RD");  //加入
+//	k1.job = ["asd"];   //重写就不会
+	k1.name = "lr";
+	console.log(k1.job); //["FE", "SEO", "RD"]
+	console.log(k2.job); //["FE", "SEO", "RD"] 给K1push了 k2也有了
+	console.log(k1.job === k2.job);  //true
+	console.log(k1.name); // lr
+	console.log(k2.name); //  zky   基本类型不会受影响
+	console.log(k1,k2);
+
+	//*******组合使用构造函数模式和原型模式*******
+
+	//最常见的方式，构造函数模式用于定义实例属性方法，原型模式定义共享属性方法
+	function Doc(name,age,job){
+		this.name = name;
+		this.age = age;
+		this.job = job;
+		this.friend = ["tr","lr"];
+	}
+	Doc.prototype = {
+		constructor:Doc,
+		sayName:function(){
+			console.log(this.name);
+		}
+	};
+	var d1 =new Doc("zky",24,"FE");
+	var d2 =new Doc("qxq",22,"UI");
+	var d3 = Doc("aaa",100,"DDD"); //undefined
+	console.log(d1,d2,d3);
+	d1.friend.push("lbb");     //这样就不冲突了
+	console.log(d1,d2);
+	console.log(d1.sayName === d2.sayName); //true
+
+	//动态原型模式  !!!该模式不能使用对象字面量重写原型
+
+	//所有信息封装在构造函数中，在构造函数中选择性的初始化原型
+
+	function Sex(name,age,job){
+		this.name = name;
+		this.age = age;
+		this.job = job;
+		this.friend = ["tr","lr"];
+		Sex.prototype = {
+			constructor: Sex,
+			aa:"111",
+			sayName : function(){
+				console.log(this.name);
+			}
+		};
+//		if(typeof this.sayName != "function"){   //在sayName不存在的情况下，才添加到原型中
+//			Sex.prototype.sayName = function(){
+//				console.log(this.name);
+//			}
+//		}
+	}
+	var s1 = new Sex("zky",24,"FE");   //没有sayName  因为它指向的是最初的原型
+	console.log(s1);
+	console.log(Sex.prototype);
+
+	//寄生构造函数模式
+	//寄生构造函数专门用来为js原生的构造函数定义新的方法
+	//像上面的例子中，SpecialArray()返回了一个对象values，这个values与Array“唯一”的区别就是比Array多了一个自定义的方法。。如果直接在Array中定义新的方法，会污染其它的数组对象甚至造成不必要的麻烦。
+	//https://segmentfault.com/q/1010000004596650
+	function Tec(a,b,c){
+		var o = new Object();
+		o.name = a;
+		o.age = b;
+		o.job = c;
+		o.sayName = function(){
+			console.log(this.name);
+		};
+		return o;
+	}
+	Tec.prototype.aa = "aa";
+	console.log(Tec.prototype);
+	var t1 = new Tec();
+	var t2 = Tec("zky",30,"Fe");
+	console.info(t1);
+	console.log(t2);
+	console.log(Tec.prototype);
+	//稳妥构造函数模式
+	//稳妥对象：没有公共属性，其方法也不引用this的对象。适合安全环境。 不使用new调用构造函数。
+	function Per(name,age,job){
+		var o = new Object();
+		o.sayName = function(){
+			console.log(name);
+		};
+		return o;
+	}
+	var pp1 = Per("zky",29,"FE");
+	console.log(pp1);
+
+	function Pers(name, age, job) {
+		var o = new Object();
+
+		// private members
+		var nameUC = name.toUpperCase();
+
+		// public members
+		o.sayName = function() {
+			console.log(name);
+		};
+		o.sayNameUC = function() {
+			console.log(nameUC);
+		};
+
+		return o;
+	}
+
+	var person = Pers("Nicholas", 32, "software Engineer");
+
+	person.sayName(); // "Nicholas"
+	person.sayNameUC(); // "NICHOLAS"
+
+	console.log(person.name);  // undefined
+	console.log(person.nameUC);  // undefined
+	//凡是想设为 private 的成员都不要挂到 Person 返回的对象 o 的属性上面，挂上了就是 public 的了。
+
+</script>
+</body>
+</html>

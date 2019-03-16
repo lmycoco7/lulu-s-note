@@ -1,0 +1,75 @@
+<!--
+    BOM:浏览器对象模型，核心对象：window
+    在浏览器中：window对象既是通过JavaScript访问浏览器的接口，又是ECMAScript规定的global对象。
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div style="border:1px solid #000;background-color: black;width: 100px;height: 100px;margin-top: 100px;margin-left: 100px;"></div>
+<script>
+
+    //1.全局作用域
+
+    var age =24;   //自动归于window对象下
+    function sayAge(){
+        console.log(this.age);
+    }
+    console.log(window.age);
+    sayAge();   //自动归于window对象下
+    window.sayAge();
+    //定义在window对象上的属性和定义全局变量的差别：delete
+    var name = "zky";
+    window.color = "red";
+    delete window.name;
+    delete window.color;
+    console.log(window.name);  //undefined   IE9报错
+    console.log(window.color); //undefined
+    //还有一点区别：尝试访问未声明的变量会抛出错误
+//    var newValue = oldValue;   //报错未定义
+    var newValue = window.oldValue;   //不报错
+
+    //2.窗口关系和框架  <frameset>标签   （html5已废弃,用<iframe>）
+
+    //如果页面中包含框架，则每个框架都拥有自己的window对象，并保存在frames中（见附页）
+
+    //3.窗口位置
+
+    //window.screenLeft/window.screenX 浏览器窗口距屏幕左边缘的位置
+    //window.screenTop/window.screenY 浏览器窗口距屏幕左边缘的位置
+    //window.moveBy(200,200) 移动200像素   (除IE都被禁用了)
+    //window.moveTo(200,200) 移动到200的位置(除IE都被禁用了)
+
+    //4.窗口大小
+    //window.innerHeight/innerWidth ||| document.documentElement.clientHeight/clientWidth 浏览器里视口大小
+    //window.outerHeight/outerWidth 浏览器整个窗口大小
+    //调整窗口大小
+//    window.resizeTo(100,100);(除IE都被禁用了)
+//    window.resizeBy(100,100);(除IE都被禁用了)
+
+    //5.导航和打开窗口
+
+    //var a= window.open() 4参数：1.url 2.窗口目标(target) 3.特性字符串(width,height,top,left,location...) 4.布尔值（是否取代当前页）
+    //a.opener  保存打开它的窗口的对象
+    //a.close() 关闭该窗口（只针对于弹出窗口） 关闭后窗口引用还在，不过只有a.closed属性
+
+    //6.间歇调用和超时调用
+
+    //javascript是单线程语言，但它允许通过设置超时值和间歇时间值来调度代码在特定的时刻执行。
+    //超时调用：setTimeout() 2参数：1.要执行的语句（最好是函数，高性能） 2.毫秒数（在多少毫秒后把代码添加到任务队列中。）
+    // var a = setTimeout.....  这个a就是超时调用标识符  使用 clearTimeout(a)取消调用
+    //间歇调用：setInterval() (最好不用，因为下一次调用可能在上一次调用之前结束。最好用setTimeout模拟)
+
+    //7.系统对话框 alert()  confirm() prompt()    外观由操作系统或浏览器设置决定  find() print()
+
+    //这3个方法打开对话框都是同步和模态，显示这些对话框时代码停止运行。
+    alert("aa");
+    //confirm 方法返回布尔值
+    if(confirm("asd?")){console.log("是");}else{console.log("否")}
+    //prompt() 两个参数：显示 和默认值  返回输入的值
+</script>
+</body>
+</html>

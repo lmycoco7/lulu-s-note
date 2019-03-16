@@ -1,0 +1,28 @@
+<!--
+    对DOM的两个主要扩展是选择符API和HTML5.
+    选择符API思路：根据CSS选择符选择与某个模式匹配的DOM元素
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="a b c" id="d" data-zky="qxq">123</div>
+<div id="f">
+    <p>
+        <span>你好</span>
+    </p>
+</div>
+<script>
+    //选择符querySelector() 和 querySelectorAll()，可以通过Document及Element类型的实例访问他们。
+    //当通过Document类型调这两个方法，会在文档范围搜索，通过Element类型调用时，在该元素后代搜索
+
+    //querySelector() 参数：css选择符，返回第一个匹配的元素，没找到返null
+    //querySelectorAll() 同上，返回NodeList实例 访问NodeList实例：item()或【】
+
+    //（不支持）matchesSelector() 同上，如果调用的和该选择符一样，就返回true，否则false。
+</script>
+</body>
+</html>
